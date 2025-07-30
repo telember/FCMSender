@@ -10,37 +10,42 @@ if (!admin.apps.length) {
 }
 
 async function pushNotification() {
-  const { tokens } = require(path.join(__dirname, 'input.json'));
-  
-  const messages = tokens.map(token => ({ 
-    token, 
-    data: payload,
-    // iOS specific config for data messages
+  const { tokens, title, body, time } = require(path.join(__dirname, 'input.json'));
+  for (let i = 0; i < time; i++) {
 
-    // notification: {
-    //   title: "test fcm data",
-    //   body: "body www"
-    // },
-    // apns: {
-    //   payload: {
-    //     aps: {
-    //       "mutable-content": 1,
-    //       "content-available": 1
-    //     }
-    //   }
-    // }
-  }));
-  const results = await admin.messaging().sendEach(messages);
-  
-  results.responses.forEach((response, i) => {
-    if (response.success) {
-      console.log(`✅ ${tokens} \n### Success: ${response.messageId}`);
-    } else {
-      console.log(`❌ ${tokens} \n### Error: ${response.error.code} - ${response.error.message}`);
-    }
-  });
-  
-  console.log(`\nTotal: ${results.successCount} sent, ${results.failureCount} failed`);
+    const messages = tokens.map(token => ({
+      token,
+      data: payload,
+
+      // iOS specific config for data messages
+      notification: {
+        title: `${title}+${i}`,
+        body: body
+      },
+      apns: {
+        payload: {
+          aps: {
+            "mutable-content": 1,
+            "content-available": 1
+          }
+        }
+      }
+    }));
+    console.log(`#FCM Send ${i + 1}/${time}`);
+    const results = await admin.messaging().sendEach(messages);
+
+    results.responses.forEach((response, i) => {
+      if (response.success) {
+        console.log(`✅ ${tokens} \n### Success: ${response.messageId}`);
+      } else {
+        console.log(`❌ ${tokens} \n### Error: ${response.error.code} - ${response.error.message}`);
+      }
+    });
+
+    console.log(`\nTotal: ${results.successCount} sent, ${results.failureCount} failed`);
+
+
+  }
 }
 
 module.exports = { pushNotification };
