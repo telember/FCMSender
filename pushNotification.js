@@ -17,7 +17,8 @@ async function pushNotification() {
       token,
       data: payload,
 
-      // iOS specific config for data messages
+      // iOS-specific configuration for data-only messages
+      // Android: Comment out this section
       notification: {
         title: `${title}+${i}`,
         body: body
